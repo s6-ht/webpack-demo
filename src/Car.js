@@ -10,6 +10,8 @@ import {
   AsyncSeriesWaterfallHook
 } from 'tapable'
 
+console.log('test');
+
 // SyncBailHook: 注册多个相同的插件时，判断执行几次事件
 // SyncWaterfallHook: 每一步都依赖上一步的执行结果，上一步的返回值作为下一步的参数，无返回值则默认返回当前参数
 // SyncLoopHook: 同步循环钩子，如果插件返回一个非undefined, 则会一直执行该插件的回调函数，直到返回undefined

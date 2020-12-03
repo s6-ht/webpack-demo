@@ -3,11 +3,12 @@
 import Car from './Car'
 
 const car = new Car()
-console.log(car.hooks)
+console.log('test')
 // 注册
 // 一
-car.hooks.start.tap('startPlugin', () => console.log('我系一下安全带'))
-// car.start()
+car.hooks.start.tap('startPlugin1', () => console.log('startPlugin1'))
+car.hooks.start.tap('startPlugin2', () => console.log('startPlugin2'))
+car.start()
 
 // 二
 car.hooks.accelerate.tap('acceleratePlugin', (speed) =>
