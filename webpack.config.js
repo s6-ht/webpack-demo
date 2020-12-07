@@ -3,7 +3,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = {
   entry: {
-    index: __dirname + '/src/index.js',
+    index: './src/index.js',
   },
   output: {
     path: __dirname + '/dist',
