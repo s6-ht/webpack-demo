@@ -2,7 +2,7 @@
 const express = require('express')
 const http = require('http')
 const path = require('path')
-const updateCompiler = require('../../utils/updateCompiler')
+const updateCompiler = require('../utils/updateCompiler')
 const fs = require('fs-extra')
 fs.join = path.join
 // const MemoryFs = require('memory-fs')
@@ -13,24 +13,24 @@ class Server {
   constructor(compiler) {
     // 保存编译器对象
     this.compiler = compiler
+    // 每次编译产生的hash
     this.currentHash;
+    this.clientSocketList = []
+    // 所有通过websocket连接到的客户端
     updateCompiler(this.compiler)
     // 创建app
     this.setupApp()
-    // 创建服务器，以app作为路由
-    this.createServer()
-    // 所有通过websocker连接到的客户端
-    this.clientSocketList = []
     // 建立钩子
     this.setupHooks()
-    // 创建一个express中间件
-    this.middleware = this.webpackDevMiddleware()
+    this.setupDevMiddleware()
     // 配置路由
     this.routes()
+    // 创建服务器，以app作为路由
+    this.createServer()
+    // 创建socket服务器
     this.createSocketServer()
   }
   createSocketServer() {
-    let {compiler} = this
     // websocket依赖http服务
     const io = socketIO(this.server)
     io.on('connection', socket => {
@@ -45,9 +45,14 @@ class Server {
     })
   }
   routes() {
-    let {compiler} = this
+    let { compiler } = this
     let config = compiler.options
     this.app.use(this.middleware(config.output.path))
+  }
+
+  setupDevMiddleware() {
+    // 返回一个express中间件
+    this.middleware = this.webpackDevMiddleware()
   }
 
   webpackDevMiddleware() {
@@ -93,7 +98,7 @@ class Server {
     }
   }
   setupHooks() {
-    let {compiler} = this
+    let { compiler } = this
     // 监听编译完成事件
     compiler.hooks.done.tap('webpack-dev-server', stats => {
       // stats是一个描述对象，里面存放着打包后的hash chunkHash contentHash 产生了哪些代码块  产出哪些模块
@@ -111,7 +116,7 @@ class Server {
     this.app = express()
   }
   createServer() {
-    // 创建http服务器
+    // 创建http服务器  this.app是一个路由中间件
     this.server = http.createServer(this.app)
   }
   listen(port, host, callback) {

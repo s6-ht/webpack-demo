@@ -12,95 +12,97 @@ class EventEmiter {
 
 let hotEmitter = new EventEmiter()
 let currentHash
+let lastHash
 ;(function (modules) {
   // 模块缓存
   var installedModules = {}
 
   // 热更新
   function hotCreateModule() {
-    function hotCheck() {
-      console.log('hotCheck')
-      hotDownloadManifest().then(update => {
-        let chunkIds = Object.keys(update.c)
-        chunkIds.forEach(chunkId => {
-          // 下载更新的代码模块
-          hotDownloadUpdateChunk(chunkId)
-        }).catch(() => {
-          window.location.reload()
-        })
-        lastHash = currentHash
-      })
-    }
-    // 以Jsonp的形式拉去更新的代码
-    function hotDownloadUpdateChunk(chunkId) {
-      let script = document.createElement('script')
-      script.src = `${chunkId}.${lastHash}.hot-update.js`
-      document.head.appendChild(script)
-    }
-
-    window.webpackHotUpdate = function (chunkId, moreModules) {
-      hotAddUpdateChunk(chunkId, moreModules)
-    }
-    let hotUpdate = {}
-    function hotAddUpdateChunk(chunkId, moreModules) {
-      for(let moduleId in moreModules) {
-        modules[moduleId] = hotUpdate[moduleId] = moreModules[moduleId]
-      }
-      hotApply()
-    }
-
-    function hotApply() {
-      for(let moduleId in hotUpdate) {
-        // 旧模块
-        let oldModule = installedModules[moduleId]
-        // 删除缓存中的旧模块
-        delete installedModules[moduleId]
-        // 循环旧模块上的所有父模块，并取出回调并执行
-        oldModule.parents.forEach(parentModule => {
-          let cb = parentModule.hot._acceptedDependencies[moduleId]
-          cb && cb()
-        })
-
-      }
-    }
-
-    function hotDownloadManifest() {
-      return new Promise(function(resolve, reject) {
-        let xhr = new XMLHttpRequest()
-        let url = `${lastHash}.hot-update.json`
-        xhr.open('get', url)
-        xhr.responseType = 'json'
-        xhr.onload = function() {
-          resolve(xhr.response)
-        }
-        xhr.send()
-      })
-    }
     let hot = {
       _acceptedDependencies: {},
       accept(deps, callback) {
-        deps.forEach(dep => hot._acceptedDependencies[dep] = callback)
+        deps.forEach((dep) => (hot._acceptedDependencies[dep] = callback))
       },
-      check: hotCheck
+      check: hotCheck,
     }
     return hot
+  }
+  function hotCheck() {
+    console.log('hotCheck')
+    hotDownloadManifest()
+      .then((update) => {
+        let chunkIds = Object.keys(update.c)
+        chunkIds.forEach((chunkId) => {
+          // 下载更新的代码模块
+          hotDownloadUpdateChunk(chunkId)
+        })
+        lastHash = currentHash
+      })
+      .catch(() => {
+        window.location.reload()
+      })
+  }
+  // 以Jsonp的形式拉去更新的代码
+  function hotDownloadUpdateChunk(chunkId) {
+    let script = document.createElement('script')
+    script.src = `${chunkId}.${lastHash}.hot-update.js`
+    document.head.appendChild(script)
+  }
+
+  window.webpackHotUpdate = function (chunkId, moreModules) {
+    hotAddUpdateChunk(chunkId, moreModules)
+  }
+  let hotUpdate = {}
+  function hotAddUpdateChunk(chunkId, moreModules) {
+    for (let moduleId in moreModules) {
+      modules[moduleId] = hotUpdate[moduleId] = moreModules[moduleId]
+    }
+    hotApply()
+  }
+
+  function hotApply() {
+    for (let moduleId in hotUpdate) {
+      // 旧模块
+      let oldModule = installedModules[moduleId]
+      // 删除缓存中的旧模块
+      delete installedModules[moduleId]
+      // 循环旧模块上的所有父模块，并取出回调并执行
+      oldModule.parents.forEach((parentModule) => {
+        let cb = parentModule.hot._acceptedDependencies[moduleId]
+        cb && cb()
+      })
+    }
+  }
+
+  function hotDownloadManifest() {
+    return new Promise(function (resolve, reject) {
+      let xhr = new XMLHttpRequest()
+      let url = `${lastHash}.hot-update.json`
+      xhr.open('get', url)
+      xhr.responseType = 'json'
+      xhr.onload = function () {
+        resolve(xhr.response)
+      }
+      xhr.send()
+    })
   }
 
   // 维护模块的父子关系
   function hotCreateRequire(parentModuleId) {
     // 因为要加载子模块的时候，父模块肯定加载完成，可以从缓存中通过父模块的ID拿到父模块对象
     let parentModule = installedModules[parentModuleId]
-    // 如果缓存里没有值，说明这是一个定义模块
-    if(!parentModuleId) return __webpack_require__
-    let hotRequire = function(childModuleId) {
+    // 如果缓存里没有值，说明这是一个顶级模块
+    if (!parentModule) return __webpack_require__
+    let hotRequire = function (childModuleId) {
       // 执行子模块，执行了require后，子模块已经被添加到installedModules中
       __webpack_require__(childModuleId)
       // 取出子模块对象
       let childModule = installedModules[childModuleId]
       // 把子模块添加到父模块对象的children里 将父模块添加到子模块的parents里
-      parentModule.children.push(childModule)
       childModule.parents.push(parentModule)
-      console.log(childModule);
+      parentModule.children.push(childModule)
+      console.log(childModule)
       // 返回子模块的导出对象
       return childModule.exports
     }
@@ -114,12 +116,12 @@ let currentHash
     let module = (installedModules[moduleId] = {
       i: moduleId,
       l: false,
-      hot: hotCreateModule(),
+      hot: hotCreateModule(moduleId),
       exports: {},
       // 当前模块的父
       parents: [],
       // 当前模块的子模块
-      children: []
+      children: [],
     })
     // 执行模块代码给module.exports赋值
     modules[moduleId].call(
@@ -137,7 +139,7 @@ let currentHash
   './src/index.js': function (module, exports, __webpack_require__) {
     // 监听webpackHotUpdate消息
     __webpack_require__('webpack/hot/dev-server.js')
-    // 连接websocket, 如果监听到ok消息，则触发webpackHotUpdate事件
+    // 连接websocket服务器, 如果监听到服务器发来的ok消息，则触发webpackHotUpdate事件
     __webpack_require__('webpack-dev-server/client/index.js')
     let input = document.createElement('input')
     document.body.appendChild(input)
@@ -182,6 +184,13 @@ let currentHash
   'webpack/hot/dev-server.js': function (module, exports, __webpack_require__) {
     hotEmitter.on('webpackHotUpdate', () => {
       console.log('hotCheck')
+      // 第一次编辑
+      if (!lastHash) {
+        lastHash = currentHash
+        return
+      }
+      // 向服务器检查更新并拉去最新代码
+      module.hot.check()
     })
   },
 })

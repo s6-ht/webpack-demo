@@ -8,6 +8,5 @@ const Server = require('./lib/server/Server')
 const compiler = webpack(config)
 const server = new Server(compiler)
 server.listen(9090, 'localhost', () => {
-  console.log('服务已启动')
+  console.log(`服务已启动, 端口: 9090`)
 })
-

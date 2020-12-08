@@ -8,6 +8,7 @@ module.exports = {
     // 从入门文件开始进行编译，找到它依赖的模块，打包在一起，就会形成一个chunk代码块
     main: './src/index.js',
   },
+  devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'main.js'
