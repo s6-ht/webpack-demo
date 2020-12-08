@@ -4,9 +4,9 @@
   "description": "webpack study",
   "main": "index.js",
   "scripts": {
-    "start": "webpack",
     "serve": "webpack-dev-server",
-    "build": "webpack"
+    "build": "webpack",
+    "dev": "node webpack-dev-server"
   },
   "repository": {
     "type": "git",
@@ -25,7 +25,11 @@
   "homepage": "https://github.com/s6-ht/webpack-demo#readme",
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
+    "fs-extra": "^9.0.1",
     "html-webpack-plugin": "^4.5.0",
+    "memory-fs": "^0.5.0",
+    "mime": "^2.4.6",
+    "socket.io": "^3.0.3",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
