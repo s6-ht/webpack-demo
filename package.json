@@ -4,9 +4,8 @@
   "description": "webpack study",
   "main": "index.js",
   "scripts": {
-    "serve": "webpack-dev-server",
     "build": "webpack",
-    "dev": "node webpack-dev-server"
+    "dev": "webpack-dev-server"
   },
   "repository": {
     "type": "git",

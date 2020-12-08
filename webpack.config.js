@@ -1,5 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const webpack = require('webpack')
 const path = require('path')
 const { HotModuleReplacementPlugin } = require('webpack')
@@ -10,8 +10,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'main.js',
-    chunkFilename: '[name].[hash].js',
+    filename: 'main.js'
   },
   mode: 'development',
   devtool: false,
@@ -19,10 +18,10 @@ module.exports = {
     hot: true
   },
   plugins: [
-    new CleanWebpackPlugin(),
+    // new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: 'public/index.html'
     }),
-    new HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin()
   ],
 }

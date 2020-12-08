@@ -1,3 +1,1 @@
-const { mode } = require('../webpack.config');
-
-module.exports = 'title1'
+module.exports = 'title3'
