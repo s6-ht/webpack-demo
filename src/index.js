@@ -4,7 +4,6 @@ document.body.appendChild(input)
 let div = document.createElement('div')
 document.body.appendChild(div)
 
-
 let render = () => {
   let title = require('./title.js')
   div.innerHTML = title

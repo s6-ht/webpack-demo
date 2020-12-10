@@ -15,8 +15,8 @@ class Server {
     this.compiler = compiler
     // 每次编译产生的hash
     this.currentHash;
-    this.clientSocketList = []
     // 所有通过websocket连接到的客户端
+    this.clientSocketList = []
     updateCompiler(this.compiler)
     // 创建app
     this.setupApp()
